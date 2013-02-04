@@ -1,0 +1,54 @@
+gem_env=~/.gem_env
+
+if [[ ! -d $gem_env ]]; then
+    mkdir $gem_env
+fi
+
+declare -a gem_env_path_stack=()
+
+function gem_env
+{
+    typeset env_name="$2"
+
+    case "$1" in
+	'usage')
+	    cat <<EOF
+gem_env usage|use|create|list|reset name
+EOF
+	    ;;
+	'use')
+	    export GEM_HOME=$gem_env/$env_name
+	    gem_env_path_stack=(
+		"${gem_env_path_stack[@]}"
+		$PATH
+	    )
+	    export PATH=$GEM_HOME:$PATH
+	    ;;
+	'create')
+	    mkdir -p $gem_env/$env_name
+	    gem_env 'use' $env_name
+	    ;;
+	'list')
+	    for d in $gem_env/*; do
+		if [[ -d $d ]]; then
+		    echo -e $(basename $d) '\t' $d
+		fi
+	    done
+	    ;;
+	'reset')
+	    typeset -i len=${#gem_env_path_stack[@]}
+	    if [[ $len -gt 0 ]]; then
+		export PATH=${gem_env_path_stack[len - 1]}
+	    fi
+	    unset GEM_HOME
+	    ;;
+	*)
+	    gem_env 'usage'
+	    ;;
+    esac
+}
+
+if [[ ! -z "$@" ]]; then
+    set -x
+    gem_env $@
+fi

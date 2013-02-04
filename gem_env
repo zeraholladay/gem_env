@@ -4,29 +4,42 @@ if [[ ! -d $gem_env ]]; then
     mkdir $gem_env
 fi
 
-declare -a gem_env_path_stack=()
-
 function gem_env
 {
     typeset env_name="$2"
 
     case "$1" in
 	'usage')
-	    cat <<EOF
-gem_env usage|use|create|list|reset name
+	    cat <<-EOF
+		gem_env usage|use|create|list|reset name
 EOF
 	    ;;
 	'use')
-	    export GEM_HOME=$gem_env/$env_name
-	    gem_env_path_stack=(
-		"${gem_env_path_stack[@]}"
-		$PATH
-	    )
-	    export PATH=$GEM_HOME:$PATH
+	    if [[ ! -d $gem_env/$env_name ]]; then
+		echo $gem_env 'does not exist'
+	    else
+		if type gem_env_reset > /dev/null 2>&1; then
+		    gem_env_reset
+		fi
+		eval 'function gem_env_reset
+		{
+		    export GEM_HOME='$GEM_HOME'
+		    export PATH='$PATH'
+		    export PS1="'$PS1'"
+		}'
+		export GEM_HOME=$gem_env/$env_name
+		export PATH=$GEM_HOME:$PATH
+		export PS1="($env_name)$PS1"
+	    fi
 	    ;;
 	'create')
-	    mkdir -p $gem_env/$env_name
-	    gem_env 'use' $env_name
+	    if [[ ! -d $gem_env/$env_name ]]; then
+		mkdir -p $gem_env/$env_name
+		gem_env 'use' $env_name
+	    else
+		echo $gem_env 'already exists'
+		return
+	    fi
 	    ;;
 	'list')
 	    for d in $gem_env/*; do
@@ -36,14 +49,14 @@ EOF
 	    done
 	    ;;
 	'reset')
-	    typeset -i len=${#gem_env_path_stack[@]}
-	    if [[ $len -gt 0 ]]; then
-		export PATH=${gem_env_path_stack[len - 1]}
+	    if type gem_env_reset > /dev/null 2>&1; then
+		gem_env_reset
+	    else
+		echo 'Nothing to reset!'
 	    fi
-	    unset GEM_HOME
 	    ;;
 	*)
-	    gem_env 'usage'
+	    gem_env usage
 	    ;;
     esac
 }
@@ -51,4 +64,5 @@ EOF
 if [[ ! -z "$@" ]]; then
     set -x
     gem_env $@
+    set +x
 fi

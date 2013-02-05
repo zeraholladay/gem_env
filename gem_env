@@ -31,7 +31,7 @@ EOF
 		    export GEM_ENV_NAME="'$GEM_ENV_NAME'"
 		}'
 		export GEM_HOME=$gem_env/$env_name
-		export PATH=$GEM_HOME:$PATH
+		export PATH=$GEM_HOME/bin:$PATH
 		export PS1="($env_name)$PS1"
 		export GEM_ENV_NAME=$env_name
 	    fi

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 gem_env=~/.gem_env
 
 if [[ ! -d $gem_env ]]; then
@@ -6,8 +8,6 @@ fi
 
 function gem_env
 {
-    typeset env_name="$2"
-
     case "$1" in
 	'usage')
 	    cat <<-EOF
@@ -15,6 +15,8 @@ function gem_env
 EOF
 	    ;;
 	'use')
+	    typeset env_name="$2"
+
 	    if [[ ! -d $gem_env/$env_name ]]; then
 		echo $gem_env 'does not exist'
 	    else
@@ -26,13 +28,17 @@ EOF
 		    export GEM_HOME='$GEM_HOME'
 		    export PATH='$PATH'
 		    export PS1="'$PS1'"
+		    export GEM_ENV_NAME="'$GEM_ENV_NAME'"
 		}'
 		export GEM_HOME=$gem_env/$env_name
 		export PATH=$GEM_HOME:$PATH
 		export PS1="($env_name)$PS1"
+		export GEM_ENV_NAME=$env_name
 	    fi
 	    ;;
 	'create')
+	    typeset env_name="$2"
+
 	    if [[ ! -d $gem_env/$env_name ]]; then
 		mkdir -p $gem_env/$env_name
 		gem_env 'use' $env_name
@@ -44,7 +50,12 @@ EOF
 	'list')
 	    for d in $gem_env/*; do
 		if [[ -d $d ]]; then
-		    echo -e $(basename $d) '\t' $d
+		    if [[ $(basename $d) = $GEM_ENV_NAME ]]; then
+			current="(current)"
+		    else
+			current=""
+		    fi
+		    echo -e $(basename $d) '\t' $d '\t' $current
 		fi
 	    done
 	    ;;
@@ -66,3 +77,8 @@ if [[ ! -z "$@" ]]; then
     gem_env $@
     set +x
 fi
+
+alias 'gemenv-use=gem_env use' 
+alias 'gemenv-create=gem_env create' 
+alias 'gemenv-list=gem_env list' 
+alias 'gemenv-reset=gem_env reset' 

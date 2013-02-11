@@ -81,4 +81,4 @@ fi
 alias 'gemenv-use=gem_env use' 
 alias 'gemenv-create=gem_env create' 
 alias 'gemenv-list=gem_env list' 
-alias 'gemenv-reset=gem_env reset' 
+alias 'gemenv-exit=gem_env reset' 

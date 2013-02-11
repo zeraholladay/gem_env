@@ -10,7 +10,7 @@ Install
     
 or
 
-    $ echo 'source gem_env/gem_env'
+    $ echo 'source gem_env/gem_env' > ~/.bashrc
 
 Usage
 =======
@@ -20,4 +20,4 @@ Once you source in gem_env, the following aliases are defined:
     $ gemenv-create some_name
     $ gemenv-list
     $ gemenv-use some_name
-    $ gemenv-reset
+    $ gemenv-exit
